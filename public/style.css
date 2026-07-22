@@ -45,7 +45,12 @@ body { background:#000; overflow:hidden; font-family:-apple-system,BlinkMacSyste
 #health-bar { height:100%; width:100%; background:#27ae60; transition:width .3s; border-radius:10px; }
 #health-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; font-weight:600; text-shadow:0 0 4px #000; }
 #crosshair { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:24px; color:rgba(255,255,255,0.7); font-weight:100; text-shadow:0 0 4px #000; pointer-events:none; user-select:none; }
+#kill-announce { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:48px; font-weight:900; text-shadow:0 0 20px rgba(0,0,0,0.8),0 0 40px rgba(0,0,0,0.5); pointer-events:none; text-align:center; transition:all 0.3s; }
+#kill-announce.gold { color:#ffd700; }
+#kill-announce.kill { color:#ff4757; }
+#kill-announce.headshot { color:#ff6b81; }
 #ammo-display { position:absolute; bottom:60px; right:30px; text-align:center; pointer-events:none; }
+.controls-panel { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:12px; color:rgba(255,255,255,0.4); pointer-events:none; text-shadow:0 0 4px #000; }
 #ammo-count { font-size:28px; font-weight:700; text-shadow:0 0 6px #000; }
 #reload-indicator { font-size:14px; color:#ffa502; font-weight:600; text-shadow:0 0 4px #000; animation:pulse 0.5s infinite; }
 #kill-feed { position:absolute; top:60px; right:20px; font-size:13px; text-align:right; pointer-events:none; }

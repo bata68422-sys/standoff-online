@@ -11,7 +11,7 @@ let obstacles3d = [];
 let walls3d = [];
 let state = null;
 let yaw = 0, pitch = 0;
-let keys = { w: false, a: false, s: false, d: false, space: false };
+let keys = { w: false, a: false, s: false, d: false, space: false, f: false };
 let shooting = false;
 let lastInputSend = 0;
 let animFrameId = null;
@@ -96,7 +96,7 @@ function handleMsg(msg) {
       if (msg.data.type === 'bullet_hit') {
         addBulletImpact(msg.data.x, msg.data.y, msg.data.z);
       }
-      if (msg.data.type === 'hit') {
+      if (msg.data.type === 'hit' || msg.data.type === 'knife_hit') {
         updateHealth();
         updateAmmo();
       }
@@ -155,19 +155,19 @@ function initGame() {
 
 function initScene() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x1a1a2e);
-  scene.fog = new THREE.Fog(0x1a1a2e, 30, 50);
+  scene.background = new THREE.Color(0x87ceeb);
+  scene.fog = new THREE.Fog(0x87ceeb, 25, 55);
 
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, 1.6, 0);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  renderer.toneMappingExposure = 1.0;
   document.body.prepend(renderer.domElement);
 
   const ambLight = new THREE.AmbientLight(0x404060, 0.5);
@@ -191,7 +191,7 @@ function initScene() {
 
   const groundGeo = new THREE.PlaneGeometry(40, 40);
   const groundMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2a3e, roughness: 0.9, metalness: 0.0,
+    color: 0x8a7a5a, roughness: 1.0, metalness: 0.0,
   });
   ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI / 2;
@@ -237,6 +237,7 @@ function initScene() {
     if (k === 's' || k === 'ы') keys.s = true;
     if (k === 'd' || k === 'в') keys.d = true;
     if (e.key === ' ') { e.preventDefault(); keys.space = true; }
+    if (k === 'f' || k === 'а') keys.f = true;
   });
   document.addEventListener('keyup', e => {
     const k = e.key.toLowerCase();
@@ -245,25 +246,29 @@ function initScene() {
     if (k === 's' || k === 'ы') keys.s = false;
     if (k === 'd' || k === 'в') keys.d = false;
     if (e.key === ' ') { keys.space = false; }
+    if (k === 'f' || k === 'а') keys.f = false;
   });
 }
 
 function makeObstacles() {
   const obsData = [
-    { x: 0, z: 0, w: 3, h: 2, d: 3 },
-    { x: -7, z: -7, w: 3, h: 2, d: 3 },
-    { x: 7, z: -7, w: 3, h: 2, d: 3 },
-    { x: -7, z: 7, w: 3, h: 2, d: 3 },
-    { x: 7, z: 7, w: 3, h: 2, d: 3 },
-    { x: 0, z: -11, w: 6, h: 2, d: 1.5 },
-    { x: 0, z: 11, w: 6, h: 2, d: 1.5 },
-    { x: -11, z: 0, w: 1.5, h: 2, d: 6 },
-    { x: 11, z: 0, w: 1.5, h: 2, d: 6 },
+    { x: 0, z: -4, w: 5, h: 1.5, d: 1 },
+    { x: 0, z: 4, w: 5, h: 1.5, d: 1 },
+    { x: -9, z: 0, w: 2, h: 2, d: 2 },
+    { x: 9, z: 0, w: 2, h: 2, d: 2 },
+    { x: -5, z: -9, w: 3, h: 2, d: 3 },
+    { x: 5, z: -9, w: 3, h: 2, d: 3 },
+    { x: -5, z: 9, w: 3, h: 2, d: 3 },
+    { x: 5, z: 9, w: 3, h: 2, d: 3 },
+    { x: -3, z: -3, w: 1, h: 2, d: 3 },
+    { x: 3, z: -3, w: 1, h: 2, d: 3 },
+    { x: -3, z: 3, w: 1, h: 2, d: 3 },
+    { x: 3, z: 3, w: 1, h: 2, d: 3 },
   ];
   for (const o of obsData) {
     const g = new THREE.BoxGeometry(o.w, o.h, o.d);
     const m = new THREE.MeshStandardMaterial({
-      color: 0x3a3a5a, roughness: 0.7, metalness: 0.3,
+      color: 0x8a7a5a, roughness: 0.9, metalness: 0.0,
     });
     const mesh = new THREE.Mesh(g, m);
     mesh.position.set(o.x, o.h / 2, o.z);
@@ -292,7 +297,7 @@ function makeWalls() {
   for (const w of wallData) {
     const g = new THREE.BoxGeometry(w.w, wallH, w.d);
     const m = new THREE.MeshStandardMaterial({
-      color: 0x222244, roughness: 0.5, metalness: 0.5,
+      color: 0x6a5a4a, roughness: 0.9, metalness: 0.0,
     });
     const mesh = new THREE.Mesh(g, m);
     mesh.position.set(w.x, wallH / 2, w.z);
@@ -303,9 +308,8 @@ function makeWalls() {
   }
 
   const floorMarkers = [
-    { x: 0, z: 0, c: 0xff475720 },
-    { x: -half + 3, z: -half + 3, c: 0x4a6cf720 },
-    { x: half - 3, z: half - 3, c: 0xff475720 },
+    { x: -12, z: -12, c: 0x4a6cf720 },
+    { x: 12, z: 12, c: 0xff475720 },
   ];
   for (const fm of floorMarkers) {
     const g2 = new THREE.PlaneGeometry(2, 2);
@@ -452,10 +456,10 @@ function updateScoreboard() {
   const html = sorted.map((p, i) => {
     const isMe = p.id === playerId;
     const color = getColorForPlayer(p.id);
-    return `<div style="color:${color}">${isMe ? '▸ ' : ''}${p.nickname}: ${p.kills} убийств / ${p.deaths} смертей</div>`;
+    return `<div style="color:${color}">${isMe ? '▸ ' : ''}${p.nickname}: 🥇 ${p.kills} / ${p.deaths}</div>`;
   }).join('');
   document.getElementById('score-entries').innerHTML = html;
-  document.getElementById('kills-to-win').textContent = `До победы: ${state.killsToWin} убийств`;
+  document.getElementById('kills-to-win').textContent = `До победы: ${state.killsToWin} голд`;
 }
 
 function updateHealth() {
@@ -463,11 +467,12 @@ function updateHealth() {
   const me = state.players[playerId];
   const pct = Math.max(0, me.health / me.maxHealth * 100);
   const bar = document.getElementById('health-bar');
-  bar.style.width = pct + '%';
-  if (pct > 60) bar.style.background = '#27ae60';
+  bar.style.width = Math.max(0, me.alive ? pct : 0) + '%';
+  if (!me.alive) bar.style.background = '#333';
+  else if (pct > 60) bar.style.background = '#27ae60';
   else if (pct > 30) bar.style.background = '#ffa502';
   else bar.style.background = '#ff4757';
-  document.getElementById('health-text').textContent = Math.ceil(me.health);
+  document.getElementById('health-text').textContent = me.alive ? Math.ceil(me.health) : '0';
 }
 
 function updateAmmo() {
@@ -529,6 +534,23 @@ function addKillFeed(killerId, victimId) {
   el.innerHTML = `<span style="color:${kColor}">${killer}</span> 🔫 <span style="color:${vColor}">${victim}</span>`;
   document.getElementById('kill-feed').appendChild(el);
   setTimeout(() => el.remove(), 3000);
+  announceKill(killer, kColor, killerId === playerId);
+}
+
+let announceTimeout = null;
+function announceKill(name, color, isMe) {
+  const el = document.getElementById('kill-announce');
+  el.classList.remove('hidden', 'gold', 'kill', 'headshot');
+  if (isMe) {
+    el.textContent = 'ГОЛДА!';
+    el.className = 'gold';
+  } else {
+    el.textContent = `${name} УБИЛ!`;
+    el.className = 'kill';
+    el.style.color = color;
+  }
+  if (announceTimeout) clearTimeout(announceTimeout);
+  announceTimeout = setTimeout(() => { el.classList.add('hidden'); }, 1500);
 }
 
 function showGameOver(winnerId) {
@@ -567,8 +589,9 @@ function sendInput() {
   else if (keys.d) strafe = 1;
   ws.send(JSON.stringify({
     type: 'input', fwd, strafe, yaw, pitch, shooting,
-    jump: keys.space,
+    jump: keys.space, knife: keys.f,
   }));
+  if (keys.f) keys.f = false;
 }
 
 function gameLoop() {

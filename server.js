@@ -14,6 +14,9 @@ const PLAYER_RADIUS = 0.4;
 const PLAYER_HEIGHT = 1.8;
 const PLAYER_SPEED = 7;
 const SHOOT_COOLDOWN = 300;
+const KNIFE_COOLDOWN = 400;
+const KNIFE_RANGE = 3;
+const KNIFE_DAMAGE = 50;
 const DAMAGE = 20;
 const MAX_HEALTH = 100;
 const KILLS_TO_WIN = 5;
@@ -24,15 +27,18 @@ const BULLET_SPEED = 40;
 const BULLET_LIFETIME = 1000;
 
 const obstacles = [
-  { x: 0, z: 0, w: 3, h: 2, d: 3 },
-  { x: -7, z: -7, w: 3, h: 2, d: 3 },
-  { x: 7, z: -7, w: 3, h: 2, d: 3 },
-  { x: -7, z: 7, w: 3, h: 2, d: 3 },
-  { x: 7, z: 7, w: 3, h: 2, d: 3 },
-  { x: 0, z: -11, w: 6, h: 2, d: 1.5 },
-  { x: 0, z: 11, w: 6, h: 2, d: 1.5 },
-  { x: -11, z: 0, w: 1.5, h: 2, d: 6 },
-  { x: 11, z: 0, w: 1.5, h: 2, d: 6 },
+  { x: 0, z: -4, w: 5, h: 1.5, d: 1 },
+  { x: 0, z: 4, w: 5, h: 1.5, d: 1 },
+  { x: -9, z: 0, w: 2, h: 2, d: 2 },
+  { x: 9, z: 0, w: 2, h: 2, d: 2 },
+  { x: -5, z: -9, w: 3, h: 2, d: 3 },
+  { x: 5, z: -9, w: 3, h: 2, d: 3 },
+  { x: -5, z: 9, w: 3, h: 2, d: 3 },
+  { x: 5, z: 9, w: 3, h: 2, d: 3 },
+  { x: -3, z: -3, w: 1, h: 2, d: 3 },
+  { x: 3, z: -3, w: 1, h: 2, d: 3 },
+  { x: -3, z: 3, w: 1, h: 2, d: 3 },
+  { x: 3, z: 3, w: 1, h: 2, d: 3 },
 ];
 
 function boxOverlap(ax, az, aw, ad, bx, bz, bw, bd) {
@@ -73,7 +79,7 @@ class Game {
       pitch: 0,
       health: MAX_HEALTH, maxHealth: MAX_HEALTH,
       kills: 0, deaths: 0,
-      lastShootTime: 0,
+      lastShootTime: 0, lastKnifeTime: 0,
       ammo: MAX_AMMO, maxAmmo: MAX_AMMO, reloading: false, reloadStartTime: 0,
       respawnAt: 0,
       alive: true,
@@ -125,8 +131,8 @@ class Game {
       }
 
       let dx = 0, dz = 0;
-      if (p.input.fwd !== 0) { dx += Math.sin(p.yaw) * p.input.fwd; dz += Math.cos(p.yaw) * p.input.fwd; }
-      if (p.input.strafe !== 0) { dx += Math.sin(p.yaw + Math.PI / 2) * p.input.strafe; dz += Math.cos(p.yaw + Math.PI / 2) * p.input.strafe; }
+      if (p.input.fwd !== 0) { dx += Math.sin(p.yaw) * p.input.fwd; dz += -Math.cos(p.yaw) * p.input.fwd; }
+      if (p.input.strafe !== 0) { dx += -Math.cos(p.yaw) * p.input.strafe; dz += -Math.sin(p.yaw) * p.input.strafe; }
       const len = Math.sqrt(dx * dx + dz * dz);
       if (len > 0) { dx /= len; dz /= len; }
 
@@ -264,6 +270,34 @@ class Game {
       }
     }
 
+    for (const id in this.players) {
+      const p = this.players[id];
+      if (!p.alive || !p.input.knife) continue;
+      if (now - p.lastKnifeTime < KNIFE_COOLDOWN) continue;
+      p.lastKnifeTime = now;
+      p.input.knife = false;
+      const dir = new THREE.Vector3(0, 0, -1);
+      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(p.pitch, p.yaw, 0, 'YXZ'));
+      dir.applyQuaternion(q);
+      for (const tid in this.players) {
+        if (tid === id) continue;
+        const t = this.players[tid];
+        if (!t.alive) continue;
+        const dist = Math.sqrt((t.x - p.x) ** 2 + (t.z - p.z) ** 2);
+        if (dist < KNIFE_RANGE && Math.abs((t.y + 0.5) - (p.y + 0.5)) < 1) {
+          t.health -= KNIFE_DAMAGE;
+          events.push({ type: 'knife_hit', shooterId: id, targetId: tid, damage: KNIFE_DAMAGE, health: t.health });
+          if (t.health <= 0) {
+            t.alive = false; t.respawnAt = now + RESPAWN_TIME;
+            p.kills++; t.deaths++;
+            events.push({ type: 'kill', killerId: id, victimId: tid });
+            if (p.kills >= KILLS_TO_WIN) { this.state = 'finished'; this.winner = id; events.push({ type: 'game_over', winnerId: id }); }
+          }
+          break;
+        }
+      }
+    }
+
     const newBullets = [];
     for (const b of this.bullets) {
       b.life -= dt * 1000;
@@ -370,6 +404,7 @@ wss.on('connection', (ws) => {
       p.input.strafe = data.strafe || 0;
       p.input.shooting = data.shooting || false;
       p.input.jump = data.jump || false;
+      p.input.knife = data.knife || false;
       if (data.yaw !== undefined) p.yaw = data.yaw;
       if (data.pitch !== undefined) p.pitch = Math.max(-1.5, Math.min(1.5, data.pitch));
     }
