@@ -5,11 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Standoff Online</title>
 <link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
 </head>
 <body>
 <div id="ui">
   <div id="menu">
-    <h1>🔫 Standoff Online</h1>
+    <h1>Standoff Online</h1>
     <p class="subtitle">3D мультиплеерный шутер</p>
     <div class="menu-box">
       <input type="text" id="nickname-input" placeholder="Ваш ник" maxlength="12" value="Player">
@@ -56,11 +63,10 @@
         <button id="play-again-btn" class="btn primary">Играть снова</button>
       </div>
     </div>
+  </div>
 
-  <button id="start-btn" class="hidden btn primary" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;padding:16px 32px;font-size:20px">Кликни чтобы играть</button>
-  <div id="debug" style="position:absolute;bottom:80px;left:10px;color:#0f0;font-size:12px;font-family:monospace;background:rgba(0,0,0,0.6);padding:6px;border-radius:4px;pointer-events:none;z-index:200;line-height:1.5"></div>
+  <button id="start-btn" class="hidden btn primary start-btn">Кликни чтобы играть</button>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.0/three.min.js"></script>
-<script src="game.js"></script>
+<script type="module" src="game.js"></script>
 </body>
 </html>
