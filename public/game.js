@@ -81,14 +81,25 @@ function handleMsg(msg) {
       }
       updateScoreboard();
       updateHealth();
+      updateAmmo();
       updatePlayers();
+      updateBullets();
     }
     return;
   }
 
   if (msg.type === 'event') {
-    if (msg.data && msg.data.type === 'kill') {
-      addKillFeed(msg.data.killerId, msg.data.victimId);
+    if (msg.data) {
+      if (msg.data.type === 'kill') {
+        addKillFeed(msg.data.killerId, msg.data.victimId);
+      }
+      if (msg.data.type === 'bullet_hit') {
+        addBulletImpact(msg.data.x, msg.data.y, msg.data.z);
+      }
+      if (msg.data.type === 'hit') {
+        updateHealth();
+        updateAmmo();
+      }
     }
     state = msg.state;
     return;
@@ -459,6 +470,55 @@ function updateHealth() {
   document.getElementById('health-text').textContent = Math.ceil(me.health);
 }
 
+function updateAmmo() {
+  if (!state || !state.players || !state.players[playerId]) return;
+  const me = state.players[playerId];
+  document.getElementById('ammo-count').textContent = `${me.ammo} / ${me.maxAmmo}`;
+  const rel = document.getElementById('reload-indicator');
+  if (me.reloading) rel.classList.remove('hidden');
+  else rel.classList.add('hidden');
+}
+
+let bulletMeshes = {};
+function updateBullets() {
+  if (!state || !state.bullets) return;
+  const currentIds = new Set(state.bullets.map(b => b.id));
+  for (const id in bulletMeshes) {
+    if (!currentIds.has(Number(id))) {
+      scene.remove(bulletMeshes[id]);
+      delete bulletMeshes[id];
+    }
+  }
+  const color = new THREE.Color(0xffff44);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffff44, transparent: true, opacity: 0.8 });
+  for (const b of state.bullets) {
+    if (!bulletMeshes[b.id]) {
+      const geo = new THREE.SphereGeometry(0.08, 6, 6);
+      const mesh = new THREE.Mesh(geo, mat);
+      scene.add(mesh);
+      bulletMeshes[b.id] = mesh;
+    }
+    bulletMeshes[b.id].position.set(b.x, b.y, b.z);
+  }
+}
+
+function addBulletImpact(x, y, z) {
+  const geo = new THREE.SphereGeometry(0.15, 8, 8);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff8800, transparent: true, opacity: 0.6 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+  const start = Date.now();
+  function fade() {
+    const t = (Date.now() - start) / 300;
+    if (t >= 1) { scene.remove(mesh); return; }
+    mat.opacity = 0.6 * (1 - t);
+    mesh.scale.setScalar(1 + t * 2);
+    requestAnimationFrame(fade);
+  }
+  fade();
+}
+
 function addKillFeed(killerId, victimId) {
   const killer = getNickForPlayer(killerId);
   const victim = getNickForPlayer(victimId);
@@ -493,6 +553,8 @@ function showGameOver(winnerId) {
       if (otherPlayers[id].label) scene.remove(otherPlayers[id].label);
     }
     otherPlayers = {};
+    for (const id in bulletMeshes) { scene.remove(bulletMeshes[id]); }
+    bulletMeshes = {};
   };
 }
 

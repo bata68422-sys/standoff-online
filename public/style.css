@@ -45,6 +45,9 @@ body { background:#000; overflow:hidden; font-family:-apple-system,BlinkMacSyste
 #health-bar { height:100%; width:100%; background:#27ae60; transition:width .3s; border-radius:10px; }
 #health-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; font-weight:600; text-shadow:0 0 4px #000; }
 #crosshair { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:24px; color:rgba(255,255,255,0.7); font-weight:100; text-shadow:0 0 4px #000; pointer-events:none; user-select:none; }
+#ammo-display { position:absolute; bottom:60px; right:30px; text-align:center; pointer-events:none; }
+#ammo-count { font-size:28px; font-weight:700; text-shadow:0 0 6px #000; }
+#reload-indicator { font-size:14px; color:#ffa502; font-weight:600; text-shadow:0 0 4px #000; animation:pulse 0.5s infinite; }
 #kill-feed { position:absolute; top:60px; right:20px; font-size:13px; text-align:right; pointer-events:none; }
 .kill-entry { background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:6px; margin-bottom:4px; animation:fadeOut 3s forwards; }
 @keyframes fadeOut { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }

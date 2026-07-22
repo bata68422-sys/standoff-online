@@ -114,6 +114,8 @@ class Game {
           p.x = s.x; p.z = s.z; p.y = PLAYER_HEIGHT / 2;
           p.health = MAX_HEALTH;
           p.alive = true;
+          p.ammo = p.maxAmmo;
+          p.reloading = false;
           p.respawnAt = 0;
           p.vy = 0;
           p.onGround = true;
@@ -245,7 +247,8 @@ class Game {
       if (hitId && hitDist < 50) {
         const target = this.players[hitId];
         target.health -= DAMAGE;
-        events.push({ type: 'hit', shooterId: id, targetId: hitId, damage: DAMAGE, health: target.health });
+        events.push({ type: 'hit', shooterId: id, targetId: hitId, damage: DAMAGE, health: target.health, bulletId: bullet.id });
+        events.push({ type: 'bullet_hit', bulletId: bullet.id, x: target.x, y: target.y + 0.5, z: target.z });
 
         if (target.health <= 0) {
           target.alive = false;
@@ -262,6 +265,43 @@ class Game {
       }
     }
 
+    const newBullets = [];
+    for (const b of this.bullets) {
+      b.life = (b.life !== undefined ? b.life : BULLET_LIFETIME) - dt * 1000;
+      if (b.life <= 0) continue;
+      const step = BULLET_SPEED * dt;
+      let bx = b.x + (b.dx / BULLET_SPEED) * step;
+      let by = b.y + (b.dy / BULLET_SPEED) * step;
+      let bz = b.z + (b.dz / BULLET_SPEED) * step;
+
+      let hitWall = false;
+      if (Math.abs(bx) > MAP_SIZE / 2 || Math.abs(bz) > MAP_SIZE / 2) hitWall = true;
+      for (const obs of obstacles) {
+        if (Math.abs(bx - obs.x) < obs.w / 2 && Math.abs(bz - obs.z) < obs.d / 2 && by < obs.h) {
+          hitWall = true; break;
+        }
+      }
+      if (hitWall) {
+        events.push({ type: 'bullet_hit', bulletId: b.id, x: bx, y: by, z: bz });
+        continue;
+      }
+
+      for (const tid in this.players) {
+        if (tid === b.shooterId) continue;
+        const t = this.players[tid];
+        if (!t.alive) continue;
+        const dist = Math.sqrt((bx - t.x) ** 2 + (bz - t.z) ** 2);
+        if (dist < PLAYER_RADIUS + 0.3 && Math.abs(by - (t.y + 0.5)) < 0.8) {
+          events.push({ type: 'bullet_hit', bulletId: b.id, x: bx, y: by, z: bz });
+          break;
+        }
+      }
+
+      b.x = bx; b.y = by; b.z = bz;
+      newBullets.push(b);
+    }
+    this.bullets = newBullets;
+
     return events;
   }
 
@@ -275,12 +315,14 @@ class Game {
         yaw: p.yaw, pitch: p.pitch,
         health: p.health, maxHealth: p.maxHealth,
         alive: p.alive,
+        ammo: p.ammo, maxAmmo: p.maxAmmo, reloading: p.reloading,
       };
     }
     return {
       code: this.code, state: this.state, mapSize: MAP_SIZE,
       players: pState, obstacles, winner: this.winner,
       killsToWin: this.killsToWin,
+      bullets: this.bullets.map(b => ({ id: b.id, x: b.x, y: b.y, z: b.z })),
     };
   }
 }
