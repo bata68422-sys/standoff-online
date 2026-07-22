@@ -137,21 +137,16 @@ function updateLobbyPlayers(s) {
 
 function startGame() {
   document.getElementById('lobby').classList.add('hidden');
-  document.getElementById('start-btn').classList.remove('hidden');
-document.getElementById('start-btn').textContent = '🔫 Кликни чтобы играть';
-document.getElementById('start-btn').onclick = () => {
-  document.getElementById('start-btn').classList.add('hidden');
-  try { initGame(); }
-  catch (e) { showError('Ошибка: ' + (e.message || e)); console.error(e); }
-};
-}
-
-function initGame() {
   if (!scene) initScene();
-  document.getElementById('hud').classList.remove('hidden');
-  document.getElementById('start-btn').classList.add('hidden');
-  renderer.domElement.requestPointerLock();
   gameLoop();
+  document.getElementById('start-btn').classList.remove('hidden');
+  document.getElementById('start-btn').textContent = '🔫 Кликни чтобы играть';
+  document.getElementById('start-btn').onclick = () => {
+    document.getElementById('start-btn').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    try { renderer.domElement.requestPointerLock(); }
+    catch (e) { showError('Ошибка: ' + (e.message || e)); console.error(e); }
+  };
 }
 
 function initScene() {
@@ -390,7 +385,7 @@ function getNickForPlayer(id) {
 }
 
 function updatePlayers() {
-  if (!state || !state.players) return;
+  if (!state || !state.players || !scene) return;
 
   const currentIds = new Set(Object.keys(state.players));
 
@@ -487,7 +482,7 @@ function updateAmmo() {
 
 let bulletMeshes = {};
 function updateBullets() {
-  if (!state || !state.bullets) return;
+  if (!state || !state.bullets || !scene) return;
   const currentIds = new Set(state.bullets.map(b => b.id));
   for (const id in bulletMeshes) {
     if (!currentIds.has(Number(id))) {
