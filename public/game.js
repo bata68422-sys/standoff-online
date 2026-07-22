@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-
 let ws = null;
 let playerId = null;
 let gameCode = null;
@@ -34,8 +32,10 @@ function connect() {
 function showError(text) {
   const el = document.getElementById('error-msg');
   el.textContent = text; el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 3000);
+  setTimeout(() => el.classList.add('hidden'), 5000);
 }
+
+window.onerror = (msg, url, line) => showError('Ошибка: ' + msg + ' (строка ' + line + ')');
 
 function handleMsg(msg) {
   if (msg.type === 'error') { showError(msg.message); return; }
@@ -138,11 +138,12 @@ function updateLobbyPlayers(s) {
 function startGame() {
   document.getElementById('lobby').classList.add('hidden');
   document.getElementById('start-btn').classList.remove('hidden');
-  document.getElementById('start-btn').textContent = '🔫 Кликни чтобы играть';
-  document.getElementById('start-btn').onclick = () => {
-    document.getElementById('start-btn').classList.add('hidden');
-    initGame();
-  };
+document.getElementById('start-btn').textContent = '🔫 Кликни чтобы играть';
+document.getElementById('start-btn').onclick = () => {
+  document.getElementById('start-btn').classList.add('hidden');
+  try { initGame(); }
+  catch (e) { showError('Ошибка: ' + (e.message || e)); console.error(e); }
+};
 }
 
 function initGame() {
