@@ -1,0 +1,55 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#000; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#fff; }
+#ui { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+#ui > * { pointer-events:auto; }
+.hidden { display:none !important; }
+
+#menu {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:rgba(10,10,20,0.95); border-radius:16px; padding:32px;
+  width:380px; text-align:center; border:1px solid rgba(255,255,255,0.1);
+}
+#menu h1 { font-size:24px; margin-bottom:4px; }
+.subtitle { color:#888; font-size:13px; margin-bottom:20px; }
+.menu-box input {
+  width:100%; padding:10px 14px; font-size:15px; background:#1a1a30;
+  border:1px solid #2a2a4a; border-radius:8px; color:#fff; outline:none; margin-bottom:10px;
+}
+.menu-box input:focus { border-color:#4a6cf7; }
+.btn {
+  padding:10px 20px; font-size:15px; border:none; border-radius:8px;
+  cursor:pointer; font-weight:600; transition:background .2s;
+}
+.btn.primary { background:#4a6cf7; color:white; width:100%; }
+.btn.primary:hover { background:#5b7bfa; }
+.btn.secondary { background:#2a2a4a; color:#e0e0e0; }
+.btn.secondary:hover { background:#3a3a5a; }
+.divider { display:flex; align-items:center; margin:12px 0; color:#555; }
+.divider::before,.divider::after { content:''; flex:1; border-top:1px solid #2a2a4a; }
+.divider span { padding:0 12px; font-size:13px; }
+.join-row { display:flex; gap:8px; }
+.join-row .code-input { flex:1; text-align:center; font-size:18px; letter-spacing:4px; text-transform:uppercase; margin-bottom:0; }
+.error { color:#ff4757; text-align:center; margin-top:10px; font-size:13px; }
+
+#lobby { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; background:rgba(10,10,20,0.95); padding:32px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); }
+#lobby h2 { margin-bottom:16px; color:#ffa502; font-size:20px; }
+.code-display .code { font-size:32px; font-weight:800; letter-spacing:8px; color:#4a6cf7; display:inline-block; margin:8px 0; }
+.lobby-players { margin-top:12px; font-size:14px; color:#aaa; }
+.hint { margin-top:16px; color:#555; font-size:13px; }
+
+#hud { width:100%; height:100%; position:relative; }
+#scoreboard { position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); padding:6px 16px; border-radius:8px; text-align:center; font-size:13px; min-width:200px; }
+#score-entries { display:flex; gap:16px; justify-content:center; }
+#kills-to-win { font-size:11px; color:#666; margin-top:2px; }
+#health-bar-wrap { position:absolute; bottom:30px; left:50%; transform:translateX(-50%); width:200px; height:20px; background:rgba(0,0,0,0.6); border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); }
+#health-bar { height:100%; width:100%; background:#27ae60; transition:width .3s; border-radius:10px; }
+#health-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; font-weight:600; text-shadow:0 0 4px #000; }
+#crosshair { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:24px; color:rgba(255,255,255,0.7); font-weight:100; text-shadow:0 0 4px #000; pointer-events:none; user-select:none; }
+#kill-feed { position:absolute; top:60px; right:20px; font-size:13px; text-align:right; pointer-events:none; }
+.kill-entry { background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:6px; margin-bottom:4px; animation:fadeOut 3s forwards; }
+@keyframes fadeOut { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+
+#game-over-overlay { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; z-index:10; }
+.overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); }
+.overlay-content { position:relative; background:rgba(10,10,20,0.95); padding:28px; border-radius:16px; text-align:center; z-index:1; border:1px solid rgba(255,255,255,0.1); }
+.overlay-content h2 { font-size:28px; margin-bottom:12px; }

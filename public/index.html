@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standoff Online</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="ui">
+  <div id="menu">
+    <h1>🔫 Standoff Online</h1>
+    <p class="subtitle">3D мультиплеерный шутер</p>
+    <div class="menu-box">
+      <input type="text" id="nickname-input" placeholder="Ваш ник" maxlength="12" value="Player">
+      <button id="create-btn" class="btn primary">Создать игру</button>
+      <div class="divider"><span>или</span></div>
+      <div class="join-row">
+        <input type="text" id="code-input" placeholder="Код" maxlength="4" class="code-input">
+        <button id="join-btn" class="btn secondary">Присоединиться</button>
+      </div>
+    </div>
+    <div id="error-msg" class="error hidden"></div>
+  </div>
+
+  <div id="lobby" class="hidden">
+    <h2>Ожидание игроков...</h2>
+    <div class="code-display">
+      <div>Код игры: <span id="game-code" class="code"></span></div>
+      <div id="lobby-players" class="lobby-players"></div>
+    </div>
+    <p class="hint">Поделитесь кодом с другом</p>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div id="scoreboard">
+      <div id="score-entries"></div>
+      <div id="kills-to-win"></div>
+    </div>
+    <div id="health-bar-wrap">
+      <div id="health-bar"></div>
+      <div id="health-text">100</div>
+    </div>
+    <div id="crosshair">+</div>
+    <div id="kill-feed"></div>
+    <div id="game-over-overlay" class="hidden">
+      <div class="overlay"></div>
+      <div class="overlay-content">
+        <h2 id="result-title"></h2>
+        <button id="play-again-btn" class="btn primary">Играть снова</button>
+      </div>
+    </div>
+    <div id="ammo-display" class="hidden">
+      <div id="gun-model"></div>
+    </div>
+  </div>
+
+  <button id="start-btn" class="hidden btn primary" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;padding:16px 32px;font-size:20px">Кликни чтобы играть</button>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1/dist/es-module-shims.min.js"></script>
+<script type="module" src="game.js"></script>
+</body>
+</html>
