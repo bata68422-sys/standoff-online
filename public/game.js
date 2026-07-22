@@ -615,7 +615,15 @@ function gameLoop() {
     }
   }
 
-  renderer.render(scene, camera);
+  if (renderer && scene && camera) renderer.render(scene, camera);
+
+  const dbg = document.getElementById('debug');
+  if (dbg) {
+    const me = state?.players?.[playerId];
+    dbg.textContent = 'lock:' + pointerLocked + ' yaw:' + yaw.toFixed(2) + ' pit:' + pitch.toFixed(2)
+      + ' keys:' + ['w','a','s','d','space'].filter(k => keys[k]).join(',')
+      + ' pos:' + (me ? me.x.toFixed(0) + ',' + me.z.toFixed(0) : '?');
+  }
 }
 
 document.getElementById('create-btn').addEventListener('click', () => {
