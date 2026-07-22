@@ -220,8 +220,7 @@ class Game {
         id: this.bulletId++,
         x: origin.x, y: origin.y, z: origin.z,
         dx: dir.x * BULLET_SPEED, dy: dir.y * BULLET_SPEED, dz: dir.z * BULLET_SPEED,
-        shooterId: id,
-        createdAt: now,
+        shooterId: id, createdAt: now, life: BULLET_LIFETIME,
       };
       this.bullets.push(bullet);
 
@@ -267,7 +266,7 @@ class Game {
 
     const newBullets = [];
     for (const b of this.bullets) {
-      b.life = (b.life !== undefined ? b.life : BULLET_LIFETIME) - dt * 1000;
+      b.life -= dt * 1000;
       if (b.life <= 0) continue;
       const step = BULLET_SPEED * dt;
       let bx = b.x + (b.dx / BULLET_SPEED) * step;
